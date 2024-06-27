@@ -1,5 +1,6 @@
 const express = require("express");
 const { initializeApp } = require("firebase/app");
+const { getDatabase, ref, set } = require("firebase/database");
 const cors = require("cors");
 const multer = require("multer");
 const csvParser = require("csv-parser");
@@ -18,6 +19,7 @@ const firebaseConfig = {
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
+const database = getDatabase(firebaseApp);
 
 const app = express();
 app.use(cors()); // Enable CORS
@@ -29,7 +31,7 @@ const upload = multer({ dest: "uploads/" });
 // Array to store all uploaded CSV data
 let msjQueue = [];
 
-// API to write data to msjQueue
+// API to write data to Firebase
 app.post("/write-data", async (req, res) => {
   try {
     const { designation, message } = req.body;
@@ -46,11 +48,14 @@ app.post("/write-data", async (req, res) => {
       message,
     };
 
-    // Push the data to msjQueue
-    msjQueue.push(data);
+    // Reference to the specific path in the database
+    const dataRef = ref(database, "messages");
+
+    // Write the data to Firebase
+    await set(dataRef, data);
 
     // Send the response
-    res.json({ message: "Data written successfully", data });
+    res.json({ message: "Data written successfully" });
   } catch (error) {
     console.error("Error writing data:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -70,7 +75,7 @@ app.post("/upload-csv", upload.single("file"), (req, res) => {
     .pipe(csvParser())
     .on("data", (data) => results.push(data))
     .on("end", () => {
-      console.log(results);
+      // console.log(results);
       // Add the results to the msjQueue array
       msjQueue.push(...results);
       // Remove the file after processing
