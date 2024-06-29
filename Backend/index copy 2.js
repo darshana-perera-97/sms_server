@@ -1,6 +1,6 @@
 const express = require("express");
 const { initializeApp } = require("firebase/app");
-const { getDatabase, ref, onValue, set } = require("firebase/database"); // Add set here
+const { getDatabase, ref, onValue } = require("firebase/database");
 const cors = require("cors");
 const multer = require("multer");
 const csvParser = require("csv-parser");
@@ -17,9 +17,9 @@ const firebaseConfig = {
   messagingSenderId: "155027503725",
   appId: "1:155027503725:web:0c46d7f10aef2e2fdfdd64",
 };
-
+let t = 1;
 const firebaseApp = initializeApp(firebaseConfig);
-const database = getDatabase(firebaseApp);
+const database = getDatabase();
 
 const app = express();
 app.use(cors()); // Enable CORS
@@ -100,20 +100,17 @@ async function processQueue() {
     const data = snapshot.val(); // Get the value from the snapshot
     console.log(data.state);
     const state = data.state;
-    if (state.state === "send2" && msjQueue.length > 0) {
+    if (state === "send2" && msjQueue.length > 0) {
       console.log(msjQueue[0]);
-      writeData("/messages", msjQueue[0]);
-      writeData("/state", { state: "send" });
-      // let tmp = msjQueue;
-      msjQueue.shift();
+      writeData("/data", { key: "value" });
     } else {
-      console.log(msjQueue);
+      console.log("No Messaging");
     }
   } catch (error) {
     console.error("Error fetching data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 }
-
 async function writeData(path, data) {
   try {
     await set(ref(database, path), data);
@@ -122,7 +119,6 @@ async function writeData(path, data) {
     console.error("Error writing data:", error);
   }
 }
-
 // Start calling processQueue every second
 setInterval(processQueue, 1000);
 
