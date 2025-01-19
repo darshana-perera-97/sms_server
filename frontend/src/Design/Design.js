@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Upload from "./Upload";
 import "bootstrap/dist/css/bootstrap.min.css";
+import SendMessageCSV from "./SendMessageCSV";
 
 const Design = () => {
   const [designation, setDesignation] = useState("");
@@ -77,6 +78,7 @@ const Design = () => {
       <div className="mt-4">
         <Upload />
       </div>
+      <SendMessageCSV />
     </div>
   );
 };
