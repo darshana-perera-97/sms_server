@@ -86,6 +86,68 @@ app.post("/upload-csv", upload.single("file"), (req, res) => {
     });
 });
 
+// API to send a single message to all numbers in an uploaded CSV
+app.post("/send-message-csv", upload.single("file"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  const { message } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: "Message is required" });
+  }
+
+  const filePath = path.join(__dirname, req.file.path);
+  const numbers = [];
+
+  fs.createReadStream(filePath)
+    .pipe(csvParser())
+    .on("data", (data) => {
+      if (data.designation) {
+        numbers.push(data.designation.trim()); // Collect numbers from the CSV
+      }
+    })
+    .on("end", async () => {
+      console.log("Numbers extracted from CSV:", numbers);
+
+      if (numbers.length === 0) {
+        return res
+          .status(400)
+          .json({ error: "No valid numbers found in the uploaded CSV" });
+      }
+
+      // Iterate over the numbers and send the message to each one
+      for (const number of numbers) {
+        const data = {
+          designation: number,
+          message,
+        };
+
+        try {
+          // Push the data to msjQueue for further processing
+          msjQueue.push(data);
+          console.log(`Message queued for ${number}: ${message}`);
+        } catch (error) {
+          console.error(`Failed to queue message for ${number}:`, error);
+        }
+      }
+
+      // Remove the CSV file after processing
+      fs.unlinkSync(filePath);
+
+      // Send a success response
+      res.json({
+        message: "Messages successfully queued for processing",
+        numbers,
+      });
+    })
+    .on("error", (error) => {
+      console.error("Error reading CSV file:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    });
+});
+
 // API to get the msjQueue array
 app.get("/msjqueue", (req, res) => {
   res.json(msjQueue);
