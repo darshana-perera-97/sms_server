@@ -34,6 +34,7 @@ let msjQueue = [];
 // API to write data to msjQueue
 app.post("/write-data", async (req, res) => {
   try {
+    // 771461925 ,text
     const { designation, message } = req.body;
 
     if (!designation || !message) {
