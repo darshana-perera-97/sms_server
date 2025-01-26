@@ -90,19 +90,9 @@ void loop()
     String receivedText;
     String receivedNum;
     String state;
+    delay(1000);
 
     // Receiving data from Firebase
-    if (Firebase.RTDB.getString(&fbdo, "messages/designation"))
-    {
-      receivedNum = fbdo.stringData();
-      Serial.println(receivedNum);
-    }
-    else
-    {
-      Serial.println("FAILED to get destination number");
-      Serial.println("REASON: " + fbdo.errorReason());
-      Serial.println("Data Type: " + fbdo.dataType());
-    }
 
     if (Firebase.RTDB.getString(&fbdo, "messages/message"))
     {
@@ -128,6 +118,17 @@ void loop()
       Serial.println("REASON: " + fbdo.errorReason());
       Serial.println("Data Type: " + fbdo.dataType());
     }
+    if (Firebase.RTDB.getString(&fbdo, "messages/designation"))
+    {
+      receivedNum = fbdo.stringData();
+      Serial.println(receivedNum);
+    }
+    else
+    {
+      Serial.println("FAILED to get destination number");
+      Serial.println("REASON: " + fbdo.errorReason());
+      Serial.println("Data Type: " + fbdo.dataType());
+    }
 
     // Send message
     if (state == "send")
@@ -136,9 +137,11 @@ void loop()
       Serial.println("Serial communication setup ok");
 
       mySerial.println("AT+CMGF=1"); // Set SMS mode to text
-      delay(1000);
+      
 
       // Construct the AT command with the received number
+
+      Serial.println("Sending" + receivedText + " to " + receivedNum);
       String sendingNumber = "+94771461925"; // Replace this with the variable for the sending number
       mySerial.print("AT+CMGS=\"+94");
       mySerial.print(receivedNum);
