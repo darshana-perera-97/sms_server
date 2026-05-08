@@ -19,10 +19,11 @@ SoftwareSerial mySerial(4, 5);
 #define WIFI_PASSWORD "dddddddd"
 
 // Insert Firebase project API Key
-#define API_KEY "AIzaSyCwAMrMTk96PffuW7a4yEKifshfGoCQBZ4"
+#define API_KEY "AIzaSyAqZtGnNzw35nZeO-ki64tCk6Yw-Nj9hQM"
 
 // Insert RTDB URL
-#define DATABASE_URL "https://sms-server-adef0-default-rtdb.firebaseio.com/"
+#define DATABASE_URL "https://sms-server-e138b-default-rtdb.firebaseio.com/"
+// #define DATABASE_URL "https://sms-server-adef0-default-rtdb.firebaseio.com/"
 
 // Define Firebase Data object
 FirebaseData fbdo;
